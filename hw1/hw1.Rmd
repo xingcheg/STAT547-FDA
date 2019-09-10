@@ -1,0 +1,289 @@
+---
+title: "STAT547 Homework 1"
+author: "Xingche Guo"
+date: "9/8/2019"
+output: pdf_document
+---
+
+# Problem 1 
+
+```{r   echo = FALSE, warning = FALSE, message = FALSE }
+
+library(fda)
+library(ggplot2)
+library(plotly)
+library(reshape2)
+library(RColorBrewer)
+```
+
+```{r}
+data(pinch)
+dim(pinch)
+
+##### (b) #####
+pinch_mu <- apply(pinch, 1, mean)
+pinch_sd <- apply(pinch, 1, sd)
+
+r_pinch <- melt(pinch)
+names(r_pinch) <- c("time", "rep", "value")
+r_pinch$time <- rep(pinchtime, 20)
+r_pinch$rep <- as.factor(r_pinch$rep)
+
+## raw
+ggplot(data = r_pinch) + 
+  geom_line(aes(x = time, y = value, group = rep), 
+              alpha = 0.5) +
+  geom_line(data = data.frame(x = pinchtime, y = pinch_mu), 
+            aes(x=x, y=y), colour = "red", size = 1.5) + 
+  geom_line(data = data.frame(x = pinchtime, y = pinch_sd), 
+            aes(x=x, y=y), colour = "blue", size = 1) +
+  theme_bw()
+
+## smoothed
+ggplot(data = r_pinch) + 
+  geom_smooth(aes(x = time, y = value, group = rep), 
+              alpha = 0.5, span = 0.1, se = FALSE, col = "gray") +
+  geom_line(data = data.frame(x = pinchtime, y = pinch_mu), 
+            aes(x=x, y=y), colour = "red", size = 1.5) + 
+  geom_line(data = data.frame(x = pinchtime, y = pinch_sd), 
+            aes(x=x, y=y), colour = "blue", size = 1) +
+  theme_bw()
+
+
+##### (c) #####
+pinch_Cov <- cov(t(pinch))
+persp(x=pinchtime, y=pinchtime, z=pinch_Cov)
+contour(x=pinchtime, y=pinchtime, z=pinch_Cov)
+
+#plot_ly(x=pinchtime, y=pinchtime, z=pinch_Cov) %>% add_surface(
+#  contours = list(
+#    z = list(
+#      show=TRUE,
+#      usecolormap=TRUE,
+#      highlightcolor="#ff0000",
+#      project=list(z=TRUE)
+#    )
+#  )
+#)
+
+```
+
+
+
+
+
+# Problem 2
+
+```{r  warning = FALSE, }
+######################## Problem 2 #######################
+D2 <- read.csv("/Users/apple/Desktop/ISU 2019 fall/STAT547/data/DataSets/Dow_companies_data.csv")
+
+##### (a) #####
+P1 <- D2$XOM[1]
+date <- as.Date(as.character(D2$Date), format = "%m/%d/%y")
+
+D_XOM <- data.frame(date = date, v1 = D2$XOM, 
+                    v2 = 100*((D2$XOM/P1)-1))
+
+ggplot(data = D_XOM) +
+  geom_line(aes(x = date, y = v1)) + 
+  ylab("stock value") + 
+  ggtitle("Exxon-Mobil (XOM)") + theme_bw()
+
+ggplot(data = D_XOM) +
+  geom_line(aes(x = date, y = v2)) + 
+  ylab("cumulative return function (%)") + 
+  ggtitle("Exxon-Mobil (XOM)") + theme_bw()
+
+
+D_XOM$v2[length(D_XOM$v2)]
+
+
+
+##### (b) #####
+D2_1 <- D2[,-1]
+
+D2_2 <- apply(D2_1, 2, FUN = function(x){
+  return( 100*(x - x[1])/x[1] )
+})
+
+r_D2_2 <- melt(D2_2)
+names(r_D2_2) <- c("date", "stock", "CRF")
+r_D2_2$date <- rep(date, 30)
+
+stock_mean <- apply(D2_2, 1, mean)
+stock_med <- apply(D2_2, 1, median)
+
+DD <- data.frame(date = rep(date,2), 
+                 CRF = c(stock_mean, stock_med),
+                 label = rep(c("mean", "median"), each = 252))
+
+
+ggplot(data = r_D2_2) + 
+  geom_line(aes(x = date, y = CRF, group = stock), colour = "gray") + 
+  geom_line(data = DD, aes(x = date, y = CRF, colour = label), size = 1) + 
+  theme_bw()
+
+
+
+##### (c) #####
+fbplot(fit = D2_2, ylim = c(-20,90), xlab="Trading day",
+       ylab = "Cumulative return")
+
+
+ fbplot(fit = D2_2, ylim = c(-20,90), prob = c(0.9, 0.6, 0.5, 0.3),
+       color = brewer.pal(4, "OrRd"),
+       xlab="Trading day", 
+       ylab = "Cumulative return")
+
+
+```
+
+
+# Problem 3
+
+Suppose $\mathrm{Var}(\pmb{x}) = \Sigma = P \Lambda P^T$, where $\Lambda$ is the eigenvalue matrix such that $\lambda_1 \ge \lambda_2 \ge \dots \ge 0$, $P$ is the corresponding eigenvector matrix, then $\mathrm{Var}(\pmb{l}_1^T \pmb{x}) = \pmb{l}_1^T \Sigma \pmb{l}_1 = \pmb{y}_1^T \Lambda \pmb{y}_1$, where $\pmb{y}_1 = P^T \pmb{l}_1$, and $\pmb{y}_1^T \pmb{y}_1 = \pmb{l}_1^T \pmb{l}_1 = 1$. Note that:
+$$
+\pmb{y}_1^T \Lambda \pmb{y}_1 = \sum_{i=1}^d \lambda_i y_{1i}^2 \ge \lambda_1,
+$$
+equality holds iff $\pmb{y}_1 = \pmb{e}_1 = (1, 0, \dots, 0)^T$. Therefore, $\pmb{v}_1 = P\pmb{e}_1 = \pmb{p}_1$, where $\pmb{p}_1$ is the eigenvector corresponding to $\lambda_1$.
+
+Also note that $\pmb{e}_1^T \pmb{y}_2 = \pmb{v}_1^T \pmb{l}_2 = 0$, which means $y_{21}=0$, 
+therefore:
+$$
+\pmb{y}_2^T \Lambda \pmb{y}_2 = \sum_{i=2}^d \lambda_i y_{2i}^2 = \lambda_2,
+$$
+
+and $\pmb{v}_2 = P\pmb{e}_2 = \pmb{p}_2$, where $\pmb{p}_2$ is the eigenvector corresponding to $\lambda_2$. 
+
+Thus, $V:=(\pmb{v}_1, \dots, \pmb{v}_d) = P$.
+
+
+# Problem 4
+
+## (a)
+$$
+\mathrm{E}(\xi_k) = \mathrm{E}(\pmb{v}_k^T (\pmb{x}-\pmb{\mu})) = 
+\pmb{v}_k^T (\pmb{\mu}-\pmb{\mu}) = 0
+$$
+
+## (b)
+$$
+\mathrm{Var}(\xi_k) = \pmb{v}_k^T \Sigma  \pmb{v}_k = \pmb{e}_k^T P^T P \Lambda P^T P \pmb{e}_k = \lambda_k
+$$
+
+## (c)
+$$
+\mathrm{Cov}(\xi_j, \xi_k) = \pmb{v}_j^T \Sigma  \pmb{v}_k = \pmb{e}_j^T \Lambda  \pmb{e}_k = \delta_{jk} \lambda_k
+$$
+
+## (d)
+$$
+\mathrm{Corr}(X_j, \xi_k) = \frac{\mathrm{Cov}(X_j, \xi_k)}{\sigma_{jj} \sqrt{\lambda_k}} =  \frac{\pmb{e}_j^T \Sigma \pmb{v}_k}{\sigma_{jj} \sqrt{\lambda_k}} = \frac{\pmb{e}_j^T (\lambda_k \pmb{v}_k)}{\sigma_{jj}\sqrt{\lambda_k}} = \frac{v_{jk}\sqrt{\lambda_k}}{\sigma_{jj}}
+$$
+
+
+# Problem 5
+
+## (a)
+$$
+||ax|| = <ax,ax>^{1/2} = |a| <x,x>^{1/2} = |a| \ ||x||
+$$
+
+## (b)
+$$
+\because \ <x + ay, x + ay> \ge 0, \ \ \ \ \forall a,
+$$
+$$
+\therefore \ <y,y> a^2 + 2<x,y>a + <x,x> \ge 0, \ \ \ \ \forall a,
+$$
+$$
+\therefore 4<x,y>^2 -4<x,x><y,y> \ge 0, 
+$$
+$$
+\therefore |<x,y>| \le ||x|| \ ||y||.
+$$
+
+## (c)
+$$
+\because||x+y||^2 = <x+y, x+y> = <x,x> + <y,y> + 2<x,y> \le ||x||^2 + ||y||^2 + 2 ||x|| \ ||y||
+=(||x|| + ||y||)^2,
+$$
+$$
+\therefore ||x+y|| \le ||x|| + ||y||.
+$$
+
+
+## (d)
+
+$$
+d(x,y)=||x-y|| = <x-y, x-y>^{1/2} = <y-x, y-x>^{1/2} = ||y-x|| = d(y,x) > 0 , \ \ \ \ iff \ \ x\neq y,
+$$
+$$
+d(x,x)=||x-x||=0
+$$
+$$
+d(x,y)=||x-y|| = ||(x-z) + (z-y)|| \le ||x-z|| + ||z-y||=d(x,z)+d(z,y).
+$$
+
+
+
+# Problem 6
+
+It's easy to find that $l_2$ space is a valid inner product space, we only need to verify that this space is complete. $\forall$ Cauchy sequence $\{x^{(n)}\}_{n=1}^{\infty}$, we have:
+$$
+lim_{n,m \rightarrow\infty}||x^{(n)} - x^{(m)}|| = 0,
+$$
+therefore, for large $n_k$, $\exists n_{k+1} > n_k$, such that:
+$$
+|| x^{(n_{k+1})} - x^{(n_k)} || \le \frac{1}{k^2}
+$$
+$$
+\therefore \sum_{k=1}^{\infty} ||  x^{(n_{k+1})} - x^{(n_k)} || < \infty
+$$
+Define $x = \liminf_{k \rightarrow \infty} x^{(n_k)}$, we only need to prove (i). $||x||^2 < \infty$,
+and (ii). $\lim_{n \rightarrow \infty} ||x - x^{(n)}|| = 0$.
+First note that:
+$$
+||x||^2 = \sum_{i=1}^{\infty} |x_i|^2 = \sum_{i=1}^{\infty} \liminf_k |x_i^{(n_k)}|^2 \le \liminf_k \sum_{i=1}^{\infty} |x_i^{(n_k)}|^2 = \liminf_k || x^{(n_k)}||^2,
+$$
+The inequality comes from Fatou's lemma, also:
+$$
+\liminf_K ||x^{(n_K)}|| \le ||x^{(n_1)}|| + \liminf_K \sum_{k=1}^{K-1} || x^{(n_{k+1})} - x^{(n_k)} || < \infty,
+$$
+therefore $||x||^2 < \infty$.
+
+
+Again, by Fatou's lemma:
+$$
+\lim_{n \rightarrow \infty} ||x - x^{(n)}||^2 = \lim_{n \rightarrow \infty} \sum_{i=1}^{\infty} |x_i - x_i^{(n)}|^2 = \lim_{n \rightarrow \infty} \sum_{i=1}^{\infty} \liminf_{k} |x_i^{(n_k)} - x_i^{(n)}|^2 \le \lim_{n ,k \rightarrow\infty} \sum_{i=1}^{\infty} |x_i^{(n_k)} - x_i^{(n)}|^2
+$$
+By the property of Cauchy sequence:
+$$
+\lim_{n \rightarrow \infty} ||x - x^{(n)}||^2 \le \lim_{n ,k \rightarrow\infty} ||x^{(n_k)} - x^{(n)}||^2 = 0,
+$$
+hence, $\lim_{n \rightarrow \infty} ||x - x^{(n)}|| = 0$. Thus, $l_2$ space to that end is an Hilbert Space.
+
+
+
+# Problem 7
+
+
+\begin{align*}
+\mathrm{E}|| X - \sum_{k=1}^K <X, e_k> e_k ||^2 & = \mathrm{E} \int X^2(t) dt - 2\sum_{k=1}^{K} \mathrm{E}<X, e_k>^2 + \sum_{k=1}^K \sum_{j=1}^K \mathrm{E}<X, e_j> <X,e_k> \delta_{jk} \\
+& = \int \mathrm{E} X^2(t) dt - \sum_{k=1}^{K} \mathrm{E}<X, e_k>^2 \\
+& = \int G(t,t)dt - \sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt.
+\end{align*}
+
+Thus, minimize $\mathrm{E}|| X - \sum_{k=1}^K <X, e_k> e_k ||^2$ is equivalent to maximize $\sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt$. By the theorem, for K orthonormal basis $\{e_k\}_{k=1}^K$, we have:
+$$
+\max \sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt = \sum_{k=1}^K \lambda_k,
+$$
+and
+$$
+\mathrm{argmax} \sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt = \{\phi_k\}_{k=1}^{K},
+$$
+where $(\lambda_k, \phi_k)$ is the $k$th eigenvalue-eigenfunction pairs for NND function $G(s,t)$.
+
+
+
