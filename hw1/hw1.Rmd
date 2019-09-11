@@ -277,11 +277,11 @@ hence, $\lim_{n \rightarrow \infty} ||x - x^{(n)}|| = 0$. Thus, $l_2$ space to t
 
 Thus, minimize $\mathrm{E}|| X - \sum_{k=1}^K <X, e_k> e_k ||^2$ is equivalent to maximize $\sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt$. By the theorem, for K orthonormal basis $\{e_k\}_{k=1}^K$, we have:
 $$
-\max \sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt = \sum_{k=1}^K \lambda_k,
+\underset{\{e_k\}_{k=1}^K}{\max} \sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt = \sum_{k=1}^K \lambda_k,
 $$
 and
 $$
-\mathrm{argmax} \sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt = \{\phi_k\}_{k=1}^{K},
+\underset{\{e_k\}_{k=1}^K}{\mathrm{arg \ max}} \sum_{k=1}^K \int \int e_k(s) e_k(t) G(s,t) ds dt = \{\phi_k\}_{k=1}^{K},
 $$
 where $(\lambda_k, \phi_k)$ is the $k$th eigenvalue-eigenfunction pairs for NND function $G(s,t)$.
 
