@@ -258,14 +258,16 @@ $$
 
 ## (a)
 
-To show absolute convergence, we only need to prove:
+To show uniform and absolute convergence, we only need to prove, $\forall t \in [0,1]$:
 $$
-\sum_{j=1}^{\infty} || a_j \lambda_j e_j ||_K < \infty,
+\sum_{j=1}^{\infty} | a_j \lambda_j e_j(t) | < \infty,
 $$
 This is true because:
 $$
-\sum_{j=1}^{\infty} || a_j \lambda_j e_j ||_K = \sum_{j=1}^{\infty}  <a_j \lambda_j e_j, a_j \lambda_j e_j>_K = \sum_{j=1}^{\infty} a_j^2 \lambda_j < \infty.
+\sum_{j=1}^{\infty} | a_j \lambda_j e_j(t) | = \sum_{j=1}^{\infty} | a_j \lambda_j^{1/2} \lambda_j^{1/2} e_j(t) | \le
+\sqrt{(\sum_{j=1}^{\infty} a_j^2 \lambda_j)(\sum_{j=1}^{\infty} \lambda_j e_j^2(t))} \le  \sqrt{K(t,t) \sum_{j=1}^{\infty} a_j^2 \lambda_j } < \infty.
 $$
+The last inequality holds because $\{K(t,t), t \in [0,1]\}$ is compact. 
 
 
 ## (b)
