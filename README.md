@@ -5,7 +5,7 @@ Functional Data Analysis Course Homework and Project
 Basics of functional data (visualization & theory).
 
 ## HW2:
-Analyse dense function data / Hilbert space theory.
+Analyse dense functional data / Hilbert space theory.
 
 ## HW3:
 FPCA (of Brownian bridge) / Basics of non-parametric smoothing.
