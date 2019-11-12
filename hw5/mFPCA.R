@@ -209,8 +209,8 @@ Get_Eigen <- function(L = 3, covArray, crosscovArray){
   eigenCov <- eigen(Cov_joint)
   L1 <- which(eigenCov$values<0)[1]
   L <- min(L, L1-1)
-  eigenval <- eigenCov$values[1:L]
-  eigenfunc <- eigenCov$vectors[,1:L, drop = FALSE]
+  eigenval <- eigenCov$values[1:L] / ngrid
+  eigenfunc <- eigenCov$vectors[,1:L, drop = FALSE] * sqrt(ngrid)
   Cov_joint_pd <- eigenfunc %*% diag(eigenval, ncol = length(eigenval)) %*% t(eigenfunc)
   return(list(eigenval = eigenval, eigenfunc = eigenfunc,
               Cov_joint = Cov_joint,  Cov_joint_pd = Cov_joint_pd))

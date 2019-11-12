@@ -117,10 +117,10 @@ fdata_den_20_2 <- MakeGPFunctionalData(n = 100, M = 101, K = 20, sigma = 0.5,
                                       lambda = exp(-(1/2)*(0:19)) )
 
 
-matplot(tt, t(fdata_den_3_1$Y), type = "l")
-matplot(tt, t(fdata_den_3_2$Y), type = "l")
-matplot(tt, t(fdata_den_20_1$Y), type = "l")
-matplot(tt, t(fdata_den_20_2$Y), type = "l")
+matplot(tt, t(fdata_den_3_1$Yn), type = "l")
+matplot(tt, t(fdata_den_3_2$Yn), type = "l")
+matplot(tt, t(fdata_den_20_1$Yn), type = "l")
+matplot(tt, t(fdata_den_20_2$Yn), type = "l")
 
 
 
